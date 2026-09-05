@@ -5,7 +5,7 @@ import { RotateCcw, RotateCw, ArrowUpRight } from 'lucide-react';
 const words = [
   { noun: '대학교', particle: '에', verb: '지원하다', image: 'apply-university-online', alt: '노트북에서 대학 입학 지원서를 작성하고 온라인으로 제출하는 학생' },
   { noun: '시험', particle: '에', verb: '합격하다', image: 'pass-exam', alt: '시험 합격 결과를 보고 기뻐하는 학생' },
-  { noun: '입학식', particle: '에', verb: '참석하다', image: 'attend-ceremony', alt: '입학식 객석에서 환영 인사를 듣는 학생' },
+  { noun: '입학식', particle: '에', verb: '참석하다', image: 'attend-ceremony-v2', alt: '입학식 플랜카드가 있는 강당에서 환영 인사를 듣는 학생' },
   { noun: '동아리', particle: '에', verb: '가입하다', image: 'join-club', alt: '사진 동아리의 새 구성원이 되는 학생' },
   { noun: '체육 대회', particle: '에', verb: '참가하다', image: 'sports-meet', alt: '체육 대회 계주에 직접 참여하는 학생' },
   { noun: '장학금', particle: '을', verb: '신청하다', image: 'scholarship', alt: '장학금 신청서를 제출하는 학생' },
