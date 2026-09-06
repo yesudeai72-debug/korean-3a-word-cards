@@ -18,6 +18,7 @@ const words = [
 
 type ContrastQuestion = {
   sentenceBefore: string;
+  sentenceAfter?: string;
   options: Array<{ verb: string; label: string }>;
   answer: string;
   clue: string;
@@ -57,8 +58,8 @@ const contrastGroups: Record<ContrastPair, {
     hintSecond: '가기',
     summary: '참가하다는 경기나 활동에 직접 함께할 때, 참석하다는 행사나 모임이 열리는 자리에 갈 때 사용해요.',
     questions: [
-      { sentenceBefore: '저는 체육 대회에서 계주 선수로 경기에', options: [{ verb: '참가하다', label: '참가했어요' }, { verb: '참석하다', label: '참석했어요' }], answer: '참가하다', clue: '선수로 직접 경기를 하는 상황이에요.' },
-      { sentenceBefore: '우리 동아리는 세 명이 한 팀이 되어 토론 대회에', options: [{ verb: '참가하다', label: '참가했어요' }, { verb: '참석하다', label: '참석했어요' }], answer: '참가하다', clue: '팀을 이루어 대회 활동에 직접 함께하는 상황이에요.' },
+      { sentenceBefore: '저는 체육 대회에서 달리기 선수로 경기에', options: [{ verb: '참가하다', label: '참가했어요' }, { verb: '참석하다', label: '참석했어요' }], answer: '참가하다', clue: '선수로 직접 경기를 하는 상황이에요.' },
+      { sentenceBefore: '동생은 학교 축제의 댄스 대회에', sentenceAfter: '1등을 했어요', options: [{ verb: '참가하다', label: '참가하여' }, { verb: '참석하다', label: '참석하여' }], answer: '참가하다', clue: '댄스 대회에 직접 나가서 춤을 추고 1등을 한 상황이에요.' },
       { sentenceBefore: '신입생들은 강당에서 열린 입학식에', options: [{ verb: '참가하다', label: '참가했어요' }, { verb: '참석하다', label: '참석했어요' }], answer: '참석하다', clue: '입학식이 열리는 자리에 가서 함께하는 상황이에요.' },
       { sentenceBefore: '교수님과 학생들은 다음 주 학과 회의에', options: [{ verb: '참가하다', label: '참가할 거예요' }, { verb: '참석하다', label: '참석할 거예요' }], answer: '참석하다', clue: '회의가 열리는 자리에 가는 상황이에요.' },
     ],
@@ -161,6 +162,7 @@ export default function Home() {
                       ))}
                       <span aria-hidden="true">)</span>
                     </span>
+                    {question.sentenceAfter && <span>{question.sentenceAfter}</span>}
                     <span>.</span>
                   </div>
                   <div className="answer-feedback" aria-live="polite">
