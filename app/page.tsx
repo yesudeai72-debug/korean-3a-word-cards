@@ -4,7 +4,7 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { ArrowUpRight, Check, ImageIcon, RotateCcw, RotateCw, Type } from 'lucide-react';
 
-type LearningStep = 'picture' | 'easy' | 'contrast';
+type LearningStep = 'picture' | 'easy' | 'contrast' | 'completion';
 type ContrastPair = 'apply' | 'participate';
 
 const words = [
@@ -66,22 +66,44 @@ const contrastGroups: Record<ContrastPair, {
   },
 };
 
+const completionQuestions = [
+  { before: '이번 교환 학생 프로그램은 열 명만 뽑아요. 저는 이 프로그램에', answer: '지원했어요', feedback: '선발 인원이 정해져 있고 뽑히기 위해 도전하므로 ‘지원했어요’가 맞아요.' },
+  { before: '저는 성적 조건에 맞아서 장학금', particleOptions: ['에', '을'], answerParticle: '을', answer: '신청했어요', feedback: '조건에 맞아 장학금을 요청하므로 ‘장학금을 신청했어요’라고 해요.' },
+  { before: '학생이면 들을 수 있는 무료 강좌', particleOptions: ['에', '를'], answerParticle: '를', answer: '신청했어요', feedback: '이용 조건에 맞아 강좌를 요청하므로 ‘무료 강좌를 신청했어요’라고 해요.' },
+  { before: '동생은 학교 축제의 댄스 대회에서 직접 춤을 추려고 대회에', answer: '참가했어요', feedback: '대회 활동에 직접 들어가 춤을 추므로 ‘참가했어요’가 맞아요.' },
+  { before: '신입생들은 강당에서 열린 입학식에', answer: '참석했어요', feedback: '입학식이 열리는 자리에 갔으므로 ‘참석했어요’가 맞아요.' },
+  { before: '저는 사진을 좋아해서 사진 동아리에', answer: '가입했어요', feedback: '동아리의 회원이 되었으므로 ‘가입했어요’가 맞아요.' },
+  { before: '민수 씨는 열심히 공부해서 한국어능력시험에', answer: '합격했어요', feedback: '시험 기준을 통과했으므로 ‘합격했어요’가 맞아요.' },
+];
+
 export default function Home() {
   const [step, setStep] = useState<LearningStep>('picture');
   const [contrastPair, setContrastPair] = useState<ContrastPair>('apply');
   const [flipped, setFlipped] = useState<string[]>([]);
   const [answers, setAnswers] = useState<Record<number, string>>({});
+  const [completionAnswers, setCompletionAnswers] = useState<Record<number, string>>({});
+  const [completionParticles, setCompletionParticles] = useState<Record<number, string>>({});
+  const [completionChecked, setCompletionChecked] = useState<number[]>([]);
   const isPictureStep = step === 'picture';
   const isEasyStep = step === 'easy';
   const isContrastStep = step === 'contrast';
+  const isCompletionStep = step === 'completion';
   const contrastGroup = contrastGroups[contrastPair];
   const contrastQuestions = contrastGroup.questions;
   const answeredCount = Object.keys(answers).length;
   const correctCount = contrastQuestions.filter((question, index) => answers[index] === question.answer).length;
+  const isCompletionCorrect = (index: number) => {
+    const question = completionQuestions[index];
+    const verbIsCorrect = (completionAnswers[index] ?? '').trim().replace(/[.]$/, '') === question.answer;
+    const particleIsCorrect = !question.answerParticle || completionParticles[index] === question.answerParticle;
+    return verbIsCorrect && particleIsCorrect;
+  };
+  const completionCorrectCount = completionQuestions.filter((_, index) => completionChecked.includes(index) && isCompletionCorrect(index)).length;
 
   const flip = (id: string) => setFlipped((list) => list.includes(id) ? list.filter((item) => item !== id) : [...list, id]);
   const changeStep = (nextStep: LearningStep) => { setStep(nextStep); setFlipped([]); };
   const changeContrastPair = (nextPair: ContrastPair) => { setContrastPair(nextPair); setAnswers({}); };
+  const resetCompletion = () => { setCompletionAnswers({}); setCompletionParticles({}); setCompletionChecked([]); };
 
   return (
     <main>
@@ -99,15 +121,19 @@ export default function Home() {
         <button type="button" className={isContrastStep ? 'active' : ''} onClick={() => changeStep('contrast')} aria-current={isContrastStep ? 'step' : undefined}>
           <span className="step-number">3</span><span><strong>두 단어 구별</strong><small>비슷한 동사 두 부류</small></span>{isContrastStep && <Check size={18} aria-hidden="true" />}
         </button>
+        <span className="step-line" aria-hidden="true" />
+        <button type="button" className={isCompletionStep ? 'active' : ''} onClick={() => changeStep('completion')} aria-current={isCompletionStep ? 'step' : undefined}>
+          <span className="step-number">4</span><span><strong>문장 완성</strong><small>조사·동사 직접 쓰기</small></span>{isCompletionStep && <Check size={18} aria-hidden="true" />}
+        </button>
       </nav>
 
       <section className="intro">
         <div>
-          <p className="eyebrow">{isPictureStep ? '1단계 · 그림으로 의미 이해' : isEasyStep ? '2단계 · 쉬운 표현으로 의미 구별' : '3단계 · 비슷한 단어 구별'}</p>
-          <h1>{isPictureStep ? '학교생활 단어 카드' : isEasyStep ? '쉬운 말로 뜻 확인하기' : contrastGroup.heading}</h1>
-          <p className="instruction">{isPictureStep ? '카드를 누르면 뜻을 그림으로 볼 수 있어요.' : isEasyStep ? '카드를 누르면 익숙한 표현으로 바꾼 문장을 볼 수 있어요.' : '문장의 상황을 읽고 괄호 안에서 알맞은 동사를 선택하세요.'}</p>
+          <p className="eyebrow">{isPictureStep ? '1단계 · 그림으로 의미 이해' : isEasyStep ? '2단계 · 쉬운 표현으로 의미 구별' : isContrastStep ? '3단계 · 비슷한 단어 구별' : '4단계 · 문장 완성 연습'}</p>
+          <h1>{isPictureStep ? '학교생활 단어 카드' : isEasyStep ? '쉬운 말로 뜻 확인하기' : isContrastStep ? contrastGroup.heading : '알맞은 동사로 문장 완성하기'}</h1>
+          <p className="instruction">{isPictureStep ? '카드를 누르면 뜻을 그림으로 볼 수 있어요.' : isEasyStep ? '카드를 누르면 익숙한 표현으로 바꾼 문장을 볼 수 있어요.' : isContrastStep ? '문장의 상황을 읽고 괄호 안에서 알맞은 동사를 선택하세요.' : '빈칸에 알맞은 동사를 활용하여 쓰고, 신청하다 문장에서는 조사도 선택하세요.'}</p>
         </div>
-        {isContrastStep ? <button className="reset" onClick={() => setAnswers({})} disabled={!answeredCount}><RotateCcw size={17} /> 다시 풀기</button> : <button className="reset" onClick={() => setFlipped([])} disabled={!flipped.length}><RotateCcw size={17} /> 모두 앞면으로</button>}
+        {isContrastStep ? <button className="reset" onClick={() => setAnswers({})} disabled={!answeredCount}><RotateCcw size={17} /> 다시 풀기</button> : isCompletionStep ? <button className="reset" onClick={resetCompletion} disabled={!completionChecked.length && !Object.keys(completionAnswers).length && !Object.keys(completionParticles).length}><RotateCcw size={17} /> 다시 풀기</button> : <button className="reset" onClick={() => setFlipped([])} disabled={!flipped.length}><RotateCcw size={17} /> 모두 앞면으로</button>}
       </section>
 
       {isContrastStep ? <>
@@ -115,9 +141,9 @@ export default function Home() {
           {(Object.keys(contrastGroups) as ContrastPair[]).map((pair) => <button type="button" role="tab" key={pair} className={contrastPair === pair ? 'active' : ''} aria-selected={contrastPair === pair} onClick={() => changeContrastPair(pair)}>{contrastGroups[pair].label}</button>)}
         </div>
         <div className="contrast-hint">{contrastGroup.hintLead}<b>{contrastGroup.hintFirst}</b>{contrastGroup.hintMiddle}<b>{contrastGroup.hintSecond}</b>인가요?</div>
-      </> : <div className="legend"><span className="blue-key">에 + 동사</span><span className="amber-key">을 + 신청하다</span></div>}
+      </> : isCompletionStep ? <div className="completion-guide"><b>동사 은행</b><span>지원하다 · 신청하다 · 참가하다 · 참석하다 · 가입하다 · 합격하다</span></div> : <div className="legend"><span className="blue-key">에 + 동사</span><span className="amber-key">을 + 신청하다</span></div>}
 
-      {!isContrastStep ? <section className="cards" aria-label={`학교생활 표현 6개, ${isPictureStep ? '그림' : '쉬운 문장'} 단계`}>
+      {(isPictureStep || isEasyStep) ? <section className="cards" aria-label={`학교생활 표현 6개, ${isPictureStep ? '그림' : '쉬운 문장'} 단계`}>
         {words.map((word, index) => {
           const cardId = `${step}-${word.image}`;
           const back = flipped.includes(cardId);
@@ -141,7 +167,7 @@ export default function Home() {
             </button>
           );
         })}
-      </section> : (
+      </section> : isContrastStep ? (
         <section className="contrast-activity" aria-label={`${contrastGroup.label} 선택 문제`}>
           <div className="activity-progress"><strong>{answeredCount} / 4</strong><span>문장 선택 완료</span></div>
           <div className="question-list">
@@ -174,6 +200,36 @@ export default function Home() {
           </div>
           {answeredCount === contrastQuestions.length && <div className="score-panel" aria-live="polite"><strong>{correctCount === 4 ? '네 문장을 모두 정확하게 구별했어요!' : `4문장 중 ${correctCount}문장을 맞혔어요.`}</strong><span>{contrastGroup.summary}</span></div>}
         </section>
+      ) : (
+        <section className="completion-activity" aria-label="알맞은 조사와 동사로 문장 완성하기">
+          <div className="activity-progress"><strong>{completionChecked.length} / {completionQuestions.length}</strong><span>문장 확인 완료</span></div>
+          <div className="completion-list">
+            {completionQuestions.map((question, index) => {
+              const checked = completionChecked.includes(index);
+              const correct = checked && isCompletionCorrect(index);
+              return (
+                <article className={`completion-card ${checked ? correct ? 'correct' : 'incorrect' : ''}`} key={question.before}>
+                  <span className="question-number">문장 {index + 1}</span>
+                  <div className="completion-sentence">
+                    <span>{question.before}</span>
+                    {question.particleOptions && <span className="particle-choice" aria-label="조사 선택">
+                      {question.particleOptions.map((particle) => <button type="button" key={particle} className={completionParticles[index] === particle ? 'selected' : ''} onClick={() => { setCompletionParticles((current) => ({ ...current, [index]: particle })); setCompletionChecked((current) => current.filter((item) => item !== index)); }} aria-pressed={completionParticles[index] === particle}>{particle}</button>)}
+                    </span>}
+                    <span className="completion-blank">
+                      <input value={completionAnswers[index] ?? ''} onChange={(event) => { setCompletionAnswers((current) => ({ ...current, [index]: event.target.value })); setCompletionChecked((current) => current.filter((item) => item !== index)); }} onKeyDown={(event) => { if (event.key === 'Enter' && (completionAnswers[index] ?? '').trim() && (!question.answerParticle || completionParticles[index])) setCompletionChecked((current) => current.includes(index) ? current : [...current, index]); }} placeholder="동사를 쓰세요" aria-label={`문장 ${index + 1}의 동사 입력`} />
+                    </span>
+                    <span>.</span>
+                  </div>
+                  <button type="button" className="check-answer" disabled={!(completionAnswers[index] ?? '').trim() || Boolean(question.answerParticle && !completionParticles[index])} onClick={() => setCompletionChecked((current) => current.includes(index) ? current : [...current, index])}>정답 확인</button>
+                  <div className="answer-feedback" aria-live="polite">
+                    {checked && <><strong>{correct ? '맞았어요!' : `다시 써 보세요. 정답은 ‘${question.answerParticle ? question.answerParticle + ' ' : ''}${question.answer}’예요.`}</strong><span>{question.feedback}</span></>}
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+          {completionChecked.length === completionQuestions.length && <div className="score-panel" aria-live="polite"><strong>{completionCorrectCount === completionQuestions.length ? '모든 문장을 정확하게 완성했어요!' : `${completionQuestions.length}문장 중 ${completionCorrectCount}문장을 맞혔어요.`}</strong><span>틀린 문장은 피드백을 읽고 조사와 동사를 고쳐 다시 확인해 보세요.</span></div>}
+        </section>
       )}
 
       {isPictureStep ? (
@@ -182,7 +238,7 @@ export default function Home() {
         <aside className="note easy-note"><strong>쉬운 말은 뜻의 열쇠</strong><p>뒷면의 문장은 뜻을 쉽게 이해하기 위한 설명이에요. 실제로 말할 때는 앞면의 목표 표현을 사용해 보세요.</p></aside>
       ) : null}
 
-      <div className="stage-action"><button type="button" onClick={() => changeStep(isPictureStep ? 'easy' : isEasyStep ? 'contrast' : 'picture')}>{isPictureStep ? '2단계 · 쉬운 말로 이해하기' : isEasyStep ? '3단계 · 두 단어 구별하기' : '1단계 · 그림으로 돌아가기'}<ArrowUpRight size={18} /></button></div>
+      <div className="stage-action"><button type="button" onClick={() => changeStep(isPictureStep ? 'easy' : isEasyStep ? 'contrast' : isContrastStep ? 'completion' : 'picture')}>{isPictureStep ? '2단계 · 쉬운 말로 이해하기' : isEasyStep ? '3단계 · 두 단어 구별하기' : isContrastStep ? '4단계 · 문장 완성하기' : '1단계 · 그림으로 돌아가기'}<ArrowUpRight size={18} /></button></div>
       <footer>서울대 한국어 3A · 1과 어휘</footer>
     </main>
   );
