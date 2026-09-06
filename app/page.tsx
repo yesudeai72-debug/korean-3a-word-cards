@@ -1,7 +1,6 @@
 'use client';
 
 import { useState } from 'react';
-import Image from 'next/image';
 import { ArrowUpRight, Check, ImageIcon, RotateCcw, RotateCw, Type } from 'lucide-react';
 
 type LearningStep = 'picture' | 'easy' | 'contrast' | 'completion';
@@ -158,7 +157,7 @@ export default function Home() {
                 </span>
                 <span className={`face back ${isPictureStep ? 'picture-back' : 'easy-back'}`} aria-hidden={!back}>
                   {isPictureStep ? (
-                    <><Image unoptimized src={`/images/${word.image}.png`} alt={word.alt} width={1024} height={1024} /><span className="image-footer"><span>0{index + 1} · 그림</span><span>문자로 돌아가기 <RotateCw size={16} /></span></span></>
+                    <><img src={`images/${word.image}.png`} alt={word.alt} width="1024" height="1024" /><span className="image-footer"><span>0{index + 1} · 그림</span><span>문자로 돌아가기 <RotateCw size={16} /></span></span></>
                   ) : (
                     <><span className="easy-content"><span className="easy-label">쉬운 말로 바꾸면</span><span className="easy-sentence">{word.easyBefore}<strong>{word.easyFocus}</strong>{word.easyAfter}</span></span><span className="image-footer easy-footer"><span>0{index + 1} · 쉬운 문장</span><span>목표 표현으로 돌아가기 <RotateCw size={16} /></span></span></>
                   )}
