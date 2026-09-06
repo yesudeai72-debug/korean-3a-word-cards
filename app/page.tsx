@@ -4,7 +4,8 @@ import { useState } from 'react';
 import Image from 'next/image';
 import { ArrowUpRight, Check, ImageIcon, RotateCcw, RotateCw, Type } from 'lucide-react';
 
-type LearningStep = 'picture' | 'easy';
+type LearningStep = 'picture' | 'easy' | 'contrast';
+type TargetVerb = '지원하다' | '신청하다';
 
 const words = [
   { noun: '대학교', particle: '에', verb: '지원하다', image: 'apply-university-online', alt: '노트북에서 대학 입학 지원서를 작성하고 온라인으로 제출하는 학생', easyBefore: '대학교에 들어가고 싶어서 온라인으로 ', easyFocus: '원서를 내요.', easyAfter: '' },
@@ -15,10 +16,27 @@ const words = [
   { noun: '장학금', particle: '을', verb: '신청하다', image: 'scholarship', alt: '장학금 신청서를 제출하는 학생', easyBefore: '장학금을 받고 싶어서 학교에 ', easyFocus: '서류를 내요.', easyAfter: '' },
 ];
 
+const contrastQuestions: Array<{
+  sentenceBefore: string;
+  options: Record<TargetVerb, string>;
+  answer: TargetVerb;
+  clue: string;
+}> = [
+  { sentenceBefore: '이 대학교는 100명만 뽑지만 500명이', options: { 지원하다: '지원했어요', 신청하다: '신청했어요' }, answer: '지원하다', clue: '정해진 인원 안에 뽑히기 위해 많은 사람과 경쟁하는 상황이에요.' },
+  { sentenceBefore: '수진 씨는 경쟁이 심해도 교환 학생 프로그램에', options: { 지원하다: '지원하려고 해요', 신청하다: '신청하려고 해요' }, answer: '지원하다', clue: '경쟁이 있어도 선발에 도전하는 상황이에요.' },
+  { sentenceBefore: '저는 성적이 3.5 이상이라서 장학금을', options: { 지원하다: '지원했어요', 신청하다: '신청했어요' }, answer: '신청하다', clue: '장학금을 받을 수 있는 성적 조건에 맞아 혜택을 요청하는 상황이에요.' },
+  { sentenceBefore: '민수 씨는 집이 학교에서 멀어서 기숙사 입사를', options: { 지원하다: '지원할 수 있어요', 신청하다: '신청할 수 있어요' }, answer: '신청하다', clue: '집이 멀다는 이용 조건에 맞아 기숙사 입사를 요청하는 상황이에요.' },
+];
+
 export default function Home() {
   const [step, setStep] = useState<LearningStep>('picture');
   const [flipped, setFlipped] = useState<string[]>([]);
+  const [answers, setAnswers] = useState<Record<number, TargetVerb>>({});
   const isPictureStep = step === 'picture';
+  const isEasyStep = step === 'easy';
+  const isContrastStep = step === 'contrast';
+  const answeredCount = Object.keys(answers).length;
+  const correctCount = contrastQuestions.filter((question, index) => answers[index] === question.answer).length;
 
   const flip = (id: string) => setFlipped((list) => list.includes(id) ? list.filter((item) => item !== id) : [...list, id]);
   const changeStep = (nextStep: LearningStep) => { setStep(nextStep); setFlipped([]); };
@@ -32,23 +50,27 @@ export default function Home() {
           <span className="step-number">1</span><span><strong>그림으로 이해</strong><small>문자 → 이미지</small></span>{isPictureStep && <Check size={18} aria-hidden="true" />}
         </button>
         <span className="step-line" aria-hidden="true" />
-        <button type="button" className={!isPictureStep ? 'active' : ''} onClick={() => changeStep('easy')} aria-current={!isPictureStep ? 'step' : undefined}>
-          <span className="step-number">2</span><span><strong>쉬운 말로 이해</strong><small>문자 → 쉬운 문장</small></span>{!isPictureStep && <Check size={18} aria-hidden="true" />}
+        <button type="button" className={isEasyStep ? 'active' : ''} onClick={() => changeStep('easy')} aria-current={isEasyStep ? 'step' : undefined}>
+          <span className="step-number">2</span><span><strong>쉬운 말로 이해</strong><small>문자 → 쉬운 문장</small></span>{isEasyStep && <Check size={18} aria-hidden="true" />}
+        </button>
+        <span className="step-line" aria-hidden="true" />
+        <button type="button" className={isContrastStep ? 'active' : ''} onClick={() => changeStep('contrast')} aria-current={isContrastStep ? 'step' : undefined}>
+          <span className="step-number">3</span><span><strong>두 단어 구별</strong><small>지원하다 ↔ 신청하다</small></span>{isContrastStep && <Check size={18} aria-hidden="true" />}
         </button>
       </nav>
 
       <section className="intro">
         <div>
-          <p className="eyebrow">{isPictureStep ? '1단계 · 그림으로 의미 이해' : '2단계 · 쉬운 표현으로 의미 구별'}</p>
-          <h1>{isPictureStep ? '학교생활 단어 카드' : '쉬운 말로 뜻 확인하기'}</h1>
-          <p className="instruction">{isPictureStep ? '카드를 누르면 뜻을 그림으로 볼 수 있어요.' : '카드를 누르면 익숙한 표현으로 바꾼 문장을 볼 수 있어요.'}</p>
+          <p className="eyebrow">{isPictureStep ? '1단계 · 그림으로 의미 이해' : isEasyStep ? '2단계 · 쉬운 표현으로 의미 구별' : '3단계 · 비슷한 단어 구별'}</p>
+          <h1>{isPictureStep ? '학교생활 단어 카드' : isEasyStep ? '쉬운 말로 뜻 확인하기' : '지원하다와 신청하다 구별하기'}</h1>
+          <p className="instruction">{isPictureStep ? '카드를 누르면 뜻을 그림으로 볼 수 있어요.' : isEasyStep ? '카드를 누르면 익숙한 표현으로 바꾼 문장을 볼 수 있어요.' : '문장의 상황을 읽고 괄호 안에서 알맞은 동사를 선택하세요.'}</p>
         </div>
-        <button className="reset" onClick={() => setFlipped([])} disabled={!flipped.length}><RotateCcw size={17} /> 모두 앞면으로</button>
+        {isContrastStep ? <button className="reset" onClick={() => setAnswers({})} disabled={!answeredCount}><RotateCcw size={17} /> 다시 풀기</button> : <button className="reset" onClick={() => setFlipped([])} disabled={!flipped.length}><RotateCcw size={17} /> 모두 앞면으로</button>}
       </section>
 
-      <div className="legend"><span className="blue-key">에 + 동사</span><span className="amber-key">을 + 신청하다</span></div>
+      {isContrastStep ? <div className="contrast-hint">뽑히기 위한 <b>경쟁·도전</b>인가요? 조건에 맞아 서비스나 혜택을 받기 위한 <b>요청</b>인가요?</div> : <div className="legend"><span className="blue-key">에 + 동사</span><span className="amber-key">을 + 신청하다</span></div>}
 
-      <section className="cards" aria-label={`학교생활 표현 6개, ${isPictureStep ? '그림' : '쉬운 문장'} 단계`}>
+      {!isContrastStep ? <section className="cards" aria-label={`학교생활 표현 6개, ${isPictureStep ? '그림' : '쉬운 문장'} 단계`}>
         {words.map((word, index) => {
           const cardId = `${step}-${word.image}`;
           const back = flipped.includes(cardId);
@@ -72,15 +94,47 @@ export default function Home() {
             </button>
           );
         })}
-      </section>
+      </section> : (
+        <section className="contrast-activity" aria-label="지원하다와 신청하다 선택 문제">
+          <div className="activity-progress"><strong>{answeredCount} / 4</strong><span>문장 선택 완료</span></div>
+          <div className="question-list">
+            {contrastQuestions.map((question, index) => {
+              const selected = answers[index];
+              const isCorrect = selected === question.answer;
+              return (
+                <article className={`question-card ${selected ? isCorrect ? 'correct' : 'incorrect' : ''}`} key={question.sentenceBefore}>
+                  <span className="question-number">문장 {index + 1}</span>
+                  <div className="question-sentence">
+                    <span>{question.sentenceBefore}</span>
+                    <span className="verb-bracket" aria-label="동사 선택 괄호">
+                      <span aria-hidden="true">(</span>
+                      {(Object.keys(question.options) as TargetVerb[]).map((verb) => (
+                        <button type="button" key={verb} className={selected === verb ? 'selected' : ''} onClick={() => setAnswers((current) => ({ ...current, [index]: verb }))} aria-pressed={selected === verb}>
+                          {question.options[verb]}
+                        </button>
+                      ))}
+                      <span aria-hidden="true">)</span>
+                    </span>
+                    <span>.</span>
+                  </div>
+                  <div className="answer-feedback" aria-live="polite">
+                    {selected && <><strong>{isCorrect ? '맞았어요!' : `다시 생각해 보세요. 정답은 ‘${question.options[question.answer]}’예요.`}</strong><span>{question.clue}</span></>}
+                  </div>
+                </article>
+              );
+            })}
+          </div>
+          {answeredCount === contrastQuestions.length && <div className="score-panel" aria-live="polite"><strong>{correctCount === 4 ? '네 문장을 모두 정확하게 구별했어요!' : `4문장 중 ${correctCount}문장을 맞혔어요.`}</strong><span><b>지원하다</b>는 선발을 위한 경쟁·도전, <b>신청하다</b>는 조건에 맞아 서비스나 혜택을 요청하는 상황에 사용해요.</span></div>}
+        </section>
+      )}
 
       {isPictureStep ? (
         <aside className="note"><strong>장학금<span>을</span> 신청하다</strong><p>이 표현에서는 <b>‘을’</b>을 써요. 다른 다섯 표현의 <b>‘에’</b>와 비교해 보세요.</p></aside>
-      ) : (
+      ) : isEasyStep ? (
         <aside className="note easy-note"><strong>쉬운 말은 뜻의 열쇠</strong><p>뒷면의 문장은 뜻을 쉽게 이해하기 위한 설명이에요. 실제로 말할 때는 앞면의 목표 표현을 사용해 보세요.</p></aside>
-      )}
+      ) : null}
 
-      <div className="stage-action"><button type="button" onClick={() => changeStep(isPictureStep ? 'easy' : 'picture')}>{isPictureStep ? '2단계 · 쉬운 말로 이해하기' : '1단계 · 그림으로 돌아가기'}<ArrowUpRight size={18} /></button></div>
+      <div className="stage-action"><button type="button" onClick={() => changeStep(isPictureStep ? 'easy' : isEasyStep ? 'contrast' : 'picture')}>{isPictureStep ? '2단계 · 쉬운 말로 이해하기' : isEasyStep ? '3단계 · 두 단어 구별하기' : '1단계 · 그림으로 돌아가기'}<ArrowUpRight size={18} /></button></div>
       <footer>서울대 한국어 3A · 1과 어휘</footer>
     </main>
   );
