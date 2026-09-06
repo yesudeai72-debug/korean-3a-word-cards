@@ -11,7 +11,7 @@ const words = [
   { noun: '시험', particle: '에', verb: '합격하다', image: 'pass-exam', alt: '시험 합격 결과를 보고 기뻐하는 학생', easyBefore: '시험을 잘 봐서 기준을 ', easyFocus: '통과했어요.', easyAfter: '' },
   { noun: '입학식', particle: '에', verb: '참석하다', image: 'attend-ceremony-v2', alt: '입학식 플랜카드가 있는 강당에서 환영 인사를 듣는 학생', easyBefore: '입학식에 ', easyFocus: '가서 자리에 앉아', easyAfter: ' 함께해요.' },
   { noun: '동아리', particle: '에', verb: '가입하다', image: 'join-club', alt: '사진 동아리의 새 구성원이 되는 학생', easyBefore: '동아리에 들어가서 ', easyFocus: '회원이 돼요.', easyAfter: '' },
-  { noun: '체육 대회', particle: '에', verb: '참가하다', image: 'sports-meet', alt: '체육 대회 계주에 직접 참여하는 학생', easyBefore: '체육 대회에서 ', easyFocus: '선수로 뛰며', easyAfter: ' 함께 활동해요.' },
+  { noun: '체육 대회', particle: '에', verb: '참가하다', image: 'sports-meet', alt: '체육 대회 계주에 직접 참여하는 학생', easyBefore: '체육대회에서 ', easyFocus: '선수로 직접 경기해요.', easyAfter: '' },
   { noun: '장학금', particle: '을', verb: '신청하다', image: 'scholarship', alt: '장학금 신청서를 제출하는 학생', easyBefore: '장학금을 받고 싶어서 학교에 ', easyFocus: '서류를 내요.', easyAfter: '' },
 ];
 
