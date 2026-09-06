@@ -5,7 +5,7 @@ import Image from 'next/image';
 import { ArrowUpRight, Check, ImageIcon, RotateCcw, RotateCw, Type } from 'lucide-react';
 
 type LearningStep = 'picture' | 'easy' | 'contrast';
-type TargetVerb = '지원하다' | '신청하다';
+type ContrastPair = 'apply' | 'participate';
 
 const words = [
   { noun: '대학교', particle: '에', verb: '지원하다', image: 'apply-university-online', alt: '노트북에서 대학 입학 지원서를 작성하고 온라인으로 제출하는 학생', easyBefore: '대학교에 들어가고 싶어서 온라인으로 ', easyFocus: '원서를 내요.', easyAfter: '' },
@@ -16,30 +16,71 @@ const words = [
   { noun: '장학금', particle: '을', verb: '신청하다', image: 'scholarship', alt: '장학금 신청서를 제출하는 학생', easyBefore: '장학금을 받고 싶어서 학교에 ', easyFocus: '서류를 내요.', easyAfter: '' },
 ];
 
-const contrastQuestions: Array<{
+type ContrastQuestion = {
   sentenceBefore: string;
-  options: Record<TargetVerb, string>;
-  answer: TargetVerb;
+  options: Array<{ verb: string; label: string }>;
+  answer: string;
   clue: string;
-}> = [
-  { sentenceBefore: '이 대학교는 100명만 뽑지만 500명이', options: { 지원하다: '지원했어요', 신청하다: '신청했어요' }, answer: '지원하다', clue: '정해진 인원 안에 뽑히기 위해 많은 사람과 경쟁하는 상황이에요.' },
-  { sentenceBefore: '수진 씨는 경쟁이 심해도 교환 학생 프로그램에', options: { 지원하다: '지원하려고 해요', 신청하다: '신청하려고 해요' }, answer: '지원하다', clue: '경쟁이 있어도 선발에 도전하는 상황이에요.' },
-  { sentenceBefore: '저는 성적이 3.5 이상이라서 장학금을', options: { 지원하다: '지원했어요', 신청하다: '신청했어요' }, answer: '신청하다', clue: '장학금을 받을 수 있는 성적 조건에 맞아 혜택을 요청하는 상황이에요.' },
-  { sentenceBefore: '민수 씨는 집이 학교에서 멀어서 기숙사 입사를', options: { 지원하다: '지원할 수 있어요', 신청하다: '신청할 수 있어요' }, answer: '신청하다', clue: '집이 멀다는 이용 조건에 맞아 기숙사 입사를 요청하는 상황이에요.' },
-];
+};
+
+const contrastGroups: Record<ContrastPair, {
+  label: string;
+  heading: string;
+  hintLead: string;
+  hintFirst: string;
+  hintMiddle: string;
+  hintSecond: string;
+  summary: string;
+  questions: ContrastQuestion[];
+}> = {
+  apply: {
+    label: '지원하다 / 신청하다',
+    heading: '지원하다와 신청하다 구별하기',
+    hintLead: '뽑히기 위한 ',
+    hintFirst: '경쟁·도전',
+    hintMiddle: '인가요? 조건에 맞아 서비스나 혜택을 받기 위한 ',
+    hintSecond: '요청',
+    summary: '지원하다는 선발을 위한 경쟁·도전, 신청하다는 조건에 맞아 서비스나 혜택을 요청하는 상황에 사용해요.',
+    questions: [
+      { sentenceBefore: '이 대학교는 100명만 뽑지만 500명이', options: [{ verb: '지원하다', label: '지원했어요' }, { verb: '신청하다', label: '신청했어요' }], answer: '지원하다', clue: '정해진 인원 안에 뽑히기 위해 많은 사람과 경쟁하는 상황이에요.' },
+      { sentenceBefore: '수진 씨는 경쟁이 심해도 교환 학생 프로그램에', options: [{ verb: '지원하다', label: '지원하려고 해요' }, { verb: '신청하다', label: '신청하려고 해요' }], answer: '지원하다', clue: '경쟁이 있어도 선발에 도전하는 상황이에요.' },
+      { sentenceBefore: '저는 성적이 3.5 이상이라서 장학금을', options: [{ verb: '지원하다', label: '지원했어요' }, { verb: '신청하다', label: '신청했어요' }], answer: '신청하다', clue: '장학금을 받을 수 있는 성적 조건에 맞아 혜택을 요청하는 상황이에요.' },
+      { sentenceBefore: '민수 씨는 집이 학교에서 멀어서 기숙사 입사를', options: [{ verb: '지원하다', label: '지원할 수 있어요' }, { verb: '신청하다', label: '신청할 수 있어요' }], answer: '신청하다', clue: '집이 멀다는 이용 조건에 맞아 기숙사 입사를 요청하는 상황이에요.' },
+    ],
+  },
+  participate: {
+    label: '참가하다 / 참석하다',
+    heading: '참가하다와 참석하다 구별하기',
+    hintLead: '경기나 활동에 ',
+    hintFirst: '직접 함께하기',
+    hintMiddle: '인가요? 행사나 모임이 열리는 자리에 ',
+    hintSecond: '가기',
+    summary: '참가하다는 경기나 활동에 직접 함께할 때, 참석하다는 행사나 모임이 열리는 자리에 갈 때 사용해요.',
+    questions: [
+      { sentenceBefore: '저는 체육 대회에서 계주 선수로 경기에', options: [{ verb: '참가하다', label: '참가했어요' }, { verb: '참석하다', label: '참석했어요' }], answer: '참가하다', clue: '선수로 직접 경기를 하는 상황이에요.' },
+      { sentenceBefore: '우리 동아리는 세 명이 한 팀이 되어 토론 대회에', options: [{ verb: '참가하다', label: '참가했어요' }, { verb: '참석하다', label: '참석했어요' }], answer: '참가하다', clue: '팀을 이루어 대회 활동에 직접 함께하는 상황이에요.' },
+      { sentenceBefore: '신입생들은 강당에서 열린 입학식에', options: [{ verb: '참가하다', label: '참가했어요' }, { verb: '참석하다', label: '참석했어요' }], answer: '참석하다', clue: '입학식이 열리는 자리에 가서 함께하는 상황이에요.' },
+      { sentenceBefore: '교수님과 학생들은 다음 주 학과 회의에', options: [{ verb: '참가하다', label: '참가할 거예요' }, { verb: '참석하다', label: '참석할 거예요' }], answer: '참석하다', clue: '회의가 열리는 자리에 가는 상황이에요.' },
+    ],
+  },
+};
 
 export default function Home() {
   const [step, setStep] = useState<LearningStep>('picture');
+  const [contrastPair, setContrastPair] = useState<ContrastPair>('apply');
   const [flipped, setFlipped] = useState<string[]>([]);
-  const [answers, setAnswers] = useState<Record<number, TargetVerb>>({});
+  const [answers, setAnswers] = useState<Record<number, string>>({});
   const isPictureStep = step === 'picture';
   const isEasyStep = step === 'easy';
   const isContrastStep = step === 'contrast';
+  const contrastGroup = contrastGroups[contrastPair];
+  const contrastQuestions = contrastGroup.questions;
   const answeredCount = Object.keys(answers).length;
   const correctCount = contrastQuestions.filter((question, index) => answers[index] === question.answer).length;
 
   const flip = (id: string) => setFlipped((list) => list.includes(id) ? list.filter((item) => item !== id) : [...list, id]);
   const changeStep = (nextStep: LearningStep) => { setStep(nextStep); setFlipped([]); };
+  const changeContrastPair = (nextPair: ContrastPair) => { setContrastPair(nextPair); setAnswers({}); };
 
   return (
     <main>
@@ -55,20 +96,25 @@ export default function Home() {
         </button>
         <span className="step-line" aria-hidden="true" />
         <button type="button" className={isContrastStep ? 'active' : ''} onClick={() => changeStep('contrast')} aria-current={isContrastStep ? 'step' : undefined}>
-          <span className="step-number">3</span><span><strong>두 단어 구별</strong><small>지원하다 ↔ 신청하다</small></span>{isContrastStep && <Check size={18} aria-hidden="true" />}
+          <span className="step-number">3</span><span><strong>두 단어 구별</strong><small>비슷한 동사 두 부류</small></span>{isContrastStep && <Check size={18} aria-hidden="true" />}
         </button>
       </nav>
 
       <section className="intro">
         <div>
           <p className="eyebrow">{isPictureStep ? '1단계 · 그림으로 의미 이해' : isEasyStep ? '2단계 · 쉬운 표현으로 의미 구별' : '3단계 · 비슷한 단어 구별'}</p>
-          <h1>{isPictureStep ? '학교생활 단어 카드' : isEasyStep ? '쉬운 말로 뜻 확인하기' : '지원하다와 신청하다 구별하기'}</h1>
+          <h1>{isPictureStep ? '학교생활 단어 카드' : isEasyStep ? '쉬운 말로 뜻 확인하기' : contrastGroup.heading}</h1>
           <p className="instruction">{isPictureStep ? '카드를 누르면 뜻을 그림으로 볼 수 있어요.' : isEasyStep ? '카드를 누르면 익숙한 표현으로 바꾼 문장을 볼 수 있어요.' : '문장의 상황을 읽고 괄호 안에서 알맞은 동사를 선택하세요.'}</p>
         </div>
         {isContrastStep ? <button className="reset" onClick={() => setAnswers({})} disabled={!answeredCount}><RotateCcw size={17} /> 다시 풀기</button> : <button className="reset" onClick={() => setFlipped([])} disabled={!flipped.length}><RotateCcw size={17} /> 모두 앞면으로</button>}
       </section>
 
-      {isContrastStep ? <div className="contrast-hint">뽑히기 위한 <b>경쟁·도전</b>인가요? 조건에 맞아 서비스나 혜택을 받기 위한 <b>요청</b>인가요?</div> : <div className="legend"><span className="blue-key">에 + 동사</span><span className="amber-key">을 + 신청하다</span></div>}
+      {isContrastStep ? <>
+        <div className="pair-selector" role="tablist" aria-label="구별할 동사 선택">
+          {(Object.keys(contrastGroups) as ContrastPair[]).map((pair) => <button type="button" role="tab" key={pair} className={contrastPair === pair ? 'active' : ''} aria-selected={contrastPair === pair} onClick={() => changeContrastPair(pair)}>{contrastGroups[pair].label}</button>)}
+        </div>
+        <div className="contrast-hint">{contrastGroup.hintLead}<b>{contrastGroup.hintFirst}</b>{contrastGroup.hintMiddle}<b>{contrastGroup.hintSecond}</b>인가요?</div>
+      </> : <div className="legend"><span className="blue-key">에 + 동사</span><span className="amber-key">을 + 신청하다</span></div>}
 
       {!isContrastStep ? <section className="cards" aria-label={`학교생활 표현 6개, ${isPictureStep ? '그림' : '쉬운 문장'} 단계`}>
         {words.map((word, index) => {
@@ -95,7 +141,7 @@ export default function Home() {
           );
         })}
       </section> : (
-        <section className="contrast-activity" aria-label="지원하다와 신청하다 선택 문제">
+        <section className="contrast-activity" aria-label={`${contrastGroup.label} 선택 문제`}>
           <div className="activity-progress"><strong>{answeredCount} / 4</strong><span>문장 선택 완료</span></div>
           <div className="question-list">
             {contrastQuestions.map((question, index) => {
@@ -108,9 +154,9 @@ export default function Home() {
                     <span>{question.sentenceBefore}</span>
                     <span className="verb-bracket" aria-label="동사 선택 괄호">
                       <span aria-hidden="true">(</span>
-                      {(Object.keys(question.options) as TargetVerb[]).map((verb) => (
-                        <button type="button" key={verb} className={selected === verb ? 'selected' : ''} onClick={() => setAnswers((current) => ({ ...current, [index]: verb }))} aria-pressed={selected === verb}>
-                          {question.options[verb]}
+                      {question.options.map((option) => (
+                        <button type="button" key={option.verb} className={selected === option.verb ? 'selected' : ''} onClick={() => setAnswers((current) => ({ ...current, [index]: option.verb }))} aria-pressed={selected === option.verb}>
+                          {option.label}
                         </button>
                       ))}
                       <span aria-hidden="true">)</span>
@@ -118,13 +164,13 @@ export default function Home() {
                     <span>.</span>
                   </div>
                   <div className="answer-feedback" aria-live="polite">
-                    {selected && <><strong>{isCorrect ? '맞았어요!' : `다시 생각해 보세요. 정답은 ‘${question.options[question.answer]}’예요.`}</strong><span>{question.clue}</span></>}
+                    {selected && <><strong>{isCorrect ? '맞았어요!' : `다시 생각해 보세요. 정답은 ‘${question.options.find((option) => option.verb === question.answer)?.label}’예요.`}</strong><span>{question.clue}</span></>}
                   </div>
                 </article>
               );
             })}
           </div>
-          {answeredCount === contrastQuestions.length && <div className="score-panel" aria-live="polite"><strong>{correctCount === 4 ? '네 문장을 모두 정확하게 구별했어요!' : `4문장 중 ${correctCount}문장을 맞혔어요.`}</strong><span><b>지원하다</b>는 선발을 위한 경쟁·도전, <b>신청하다</b>는 조건에 맞아 서비스나 혜택을 요청하는 상황에 사용해요.</span></div>}
+          {answeredCount === contrastQuestions.length && <div className="score-panel" aria-live="polite"><strong>{correctCount === 4 ? '네 문장을 모두 정확하게 구별했어요!' : `4문장 중 ${correctCount}문장을 맞혔어요.`}</strong><span>{contrastGroup.summary}</span></div>}
         </section>
       )}
 
